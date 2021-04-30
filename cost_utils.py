@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-class Cost(self):
+class Cost():
 	def __init__(self):
 		self.r = 2.0
 		self.v_target = 2.0
