@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import dynamics_utils as dynamics
 from generate_track import OccupancyGrid
 import traj
 
@@ -32,14 +31,11 @@ class TrajOpt():
     def plot_traj(self):
         self.occ_grid.plot_trajectory(self.traj)
 
-    
-
-
 
 
 if __name__ == "__main__" :
-    size = 50
-    obs = 150
+    size = 100
+    obs = 400
     trajOpt = TrajOpt(size, obs)
     trajOpt.plot_grid()
     trajOpt.create_trajectory("astar")

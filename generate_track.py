@@ -56,10 +56,13 @@ class OccupancyGrid():
         x = pos[0]
         y = pos[1]
         neighbors = []
-        for i in range(x-1, x+2):
-            for j in range(y-1, y+2):
-                if i >= 0 and i < self.size and j >= 0 and j < self.size and self.occ_grid[i, j] != 1:
-                    neighbors.append((i, j))
+        for i in range(-1, 2):
+            ind = x+i
+            if 0 <= ind < self.size and self.occ_grid[ind, y] != 1:
+                neighbors.append((ind, y))
+            ind = y+i
+            if 0 <= ind < self.size and self.occ_grid[x, ind] != 1:
+                neighbors.append((x, ind))
         return neighbors
 
     def plot_grid(self):
