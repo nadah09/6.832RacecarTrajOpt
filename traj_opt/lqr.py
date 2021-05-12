@@ -6,11 +6,10 @@ import math
 import traj_opt_utils as traj
 import plotting_utils as plot
 
-# LQR parameter
+# LQR parameters
 Q = np.eye(4)
 R = np.eye(1)
 show_animation = True
-max_steer = np.deg2rad(45)
 
 class LQR():
     def __init__(self, cx, cy, cyaw, ck, s, target_speed):
@@ -18,7 +17,6 @@ class LQR():
         self.cy = cy 
         self.cyaw = cyaw 
         self.ck = ck 
-        self.s = s
         self.target_speed = target_speed
         self.L = 0.5
         self.goal = [cx[-1], cy[-1]]
@@ -27,26 +25,9 @@ class LQR():
     def wrapped(self,angle):
         return (angle + math.pi) % (2 * math.pi) - math.pi
     
-    def find_closest_neighbor(self, state):
-        x, y = state[0:2]
-        dx = [x -icx for icx in self.cx]
-        dy = [y-icy for icy in self.cy]
-        dists  = [math.sqrt(idx**2 +idy**2) for (idx, idy) in zip(dx, dy)]
-        minval = min(dists)
-        ind = dists.index(minval)
-
-        diff_x = self.cx[ind] - x 
-        diff_y = self.cy[ind] - y
-
-        angle = self.cyaw[ind] - math.atan2(diff_y, diff_x)
-        angle = self.wrapped(angle)
-
-        minval *= np.sign(angle)
-        return ind, minval
-    
     def get_control(self, state, prev_error, prev_theta_error):
         x, y, th, v = state
-        ind, error = self.find_closest_neighbor(state)
+        ind, error = traj.find_closest_neighbor(state, self.cx, self.cy, self.cyaw)
         k = self.ck[ind]
 
         theta_error = self.wrapped(th - self.cyaw[ind])
@@ -55,13 +36,18 @@ class LQR():
         [0, 0, v, 0],
         [0, 0, 1, self.dt],
         [0, 0, 0, 0]])
-        print(A)
 
-        B = np.array([[0],[0],[0],[v/self.L]])
+        B = np.array([[0],
+        [0],
+        [0],
+        [v/self.L]])
 
         K = traj.lqr(A, B, Q, R)
 
-        x = np.array([[error], [(error-prev_error)/self.dt], [theta_error], [(theta_error - prev_theta_error)/self.dt]])
+        x = np.array([[error], 
+        [(error-prev_error)/self.dt], 
+        [theta_error], 
+        [(theta_error - prev_theta_error)/self.dt]])
 
         delta = math.atan2(self.L*k, 1) + self.wrapped((-K@x)[0, 0])
 
