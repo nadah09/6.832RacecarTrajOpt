@@ -14,10 +14,11 @@ L = 0.5
 TARGET_SPEED = 10.0 / 3.6  # [m/s] target speed
 DT = 0.1
 show_animation = True
+dl = 1.0  # course tick
 
 
 class MPC():
-    def __init__(self, cx, cy, cyaw, ck, s):
+    def __init__(self, cx, cy, cyaw, ck, s, sp):
         self.cx = cx
         self.cy = cy 
         self.cyaw = self.smooth_yaw(cyaw)
@@ -130,7 +131,7 @@ class MPC():
     def show_final(self,ax, ay, x, y, t, error):
         plot.show_final(self.cx, self.cy, ax, ay, x, y, t, error)
 
-
+"""
 dl = 1.0  # course tick
 ax = [0.0, 6.0, 12.5, 10.0, 7.5, 3.0, -1.0]
 ay = [0.0, -3.0, -5.0, 6.5, 3.0, 5.0, -2.0]
@@ -139,4 +140,5 @@ cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(
     ax, ay, ds=0.1)
 mpc = MPC(cx, cy, cyaw, ck, s)
 t, x, y, yaw, v, d, a = mpc.find_path()
-mpc.show_final(ax, ay, x, y, t, d)     
+mpc.show_final(ax, ay, x, y, t, d)    
+"""

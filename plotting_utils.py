@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 
 def plot_traj(cx, cy):
     plt.plot(cx, cy, "-r", label="spline")
+    plt.title("Trajectory")
     plt.grid(True)
     plt.axis("equal")
     plt.xlabel("x[m]")

@@ -101,14 +101,4 @@ class LQR():
     def show_final(self,ax, ay, x, y, t, error):
         plot.show_final(self.cx, self.cy, ax, ay, x, y, t, error)
 
-ax = [0.0, 6.0, 12.5, 10.0, 7.5, 3.0, -1.0]
-ay = [0.0, -3.0, -5.0, 6.5, 3.0, 5.0, -2.0]
-
-cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(
-    ax, ay, ds=0.1)
-target_speed = 10.0 / 3.6  # simulation parameter km/h -> m/s
-
-lqr = LQR(cx, cy, cyaw, ck, s, target_speed)
-t, x, y, yaw, v, errors = lqr.find_path()
-lqr.show_final(ax, ay, x, y, t, errors)
 

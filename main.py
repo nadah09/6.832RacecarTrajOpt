@@ -1,43 +1,59 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from generate_track import OccupancyGrid
-import traj
+import lqr as lqr_utils
+import mpc as mpc_utils
+import cubic_spline_planner
+import math 
 
-class TrajOpt():
-    def __init__(self, size, obs):
-        self.size = size
-        self.obs = obs
-        self.traj = []
-        self.occ_grid = OccupancyGrid(self.size, self.obs)
-        self.occ_grid.generate_occupancy_grid()
-        self.start = self.occ_grid.get_start()
-        self.end = self.occ_grid.get_end()
-    
-    def create_trajectory(self, method):
-        if method == "astar":
-            self.run_a_star()
-        else:
-            print("Running A Star")
-            self.run_a_star()
-    
-    def run_a_star(self):
-        path = traj.a_star(self.occ_grid, self.start, self.end)
-        self.traj = path
-    
-    def plot_grid(self):
-        self.occ_grid.plot_grid()
-    
-    def plot_traj(self):
-        self.occ_grid.plot_trajectory(self.traj)
+pi = math.pi
 
+TARGET_SPEED = 10/3.6
 
+class Trajectory():
+    def __init__(self, ax, ay):
+        self.ax = ax 
+        self.ay = ay 
+    
+    def make_cubic_spline(self):
+        cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(
+        self.ax, self.ay, ds=0.1)
+        return cx, cy, cyaw, ck, s
 
 if __name__ == "__main__" :
-    size = 100
-    obs = 400
-    trajOpt = TrajOpt(size, obs)
-    trajOpt.plot_grid()
-    trajOpt.create_trajectory("astar")
-    trajOpt.plot_traj()
+    straightx = [0.0, 5.0, 10.0, 20.0, 30.0, 40.0, 50.0]
+    straighty = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    complexx = [0.0, 6.0, 12.5, 10.0, 7.5, 3.0, -1.0]
+    complexy = [0.0, -3.0, -5.0, 6.5, 3.0, 5.0, -2.0]
+
+    sharpx = [0.0, 6.0, 12.5, 10.0, 7.5, 3.0, -1.0]
+    sharpy = [0.0, -1.0, -10.0, 6.5, 3.0, 5.0, -2.0]
+
+    curvex = [0, 15, 15, 0]
+    curvey = [0, 0, 15, 15]
+
+    axs = [straightx, curvex, complexx, sharpx]
+    ays = [straighty, curvey, complexy, sharpy]
+
+    for i in range(len(axs)):
+        ax = axs[i]
+        ay = ays[i]
+        traj = Trajectory(ax, ay)
+        cx, cy, cyaw, ck, s = traj.make_cubic_spline()
+
+        lqr = lqr_utils.LQR(cx, cy, cyaw, ck, s, TARGET_SPEED)
+        lqr.plot_traj()
+        t, x, y, yaw, v, errors = lqr.find_path()
+        lqr.show_final(ax, ay, x, y, t, errors)
+
+        """
+        mpc = mpc_utils.MPC(cx, cy, cyaw, ck, s, TARGET_SPEED)
+        t, x, y, yaw, v, d, a = mpc.find_path()
+        mpc.show_final(ax, ay, x, y, t, errors)
+        """
+
+
+
+    
 
