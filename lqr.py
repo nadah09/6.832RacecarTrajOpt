@@ -7,9 +7,9 @@ import traj_opt_utils as traj
 import plotting_utils as plot
 
 # LQR parameters
-Q = np.eye(4)
-R = np.eye(1)
-show_animation = False
+Q = np.eye(5)
+R = np.eye(2)
+show_animation = True
 
 class LQR():
     def __init__(self, cx, cy, cyaw, ck, s, target_speed):
@@ -32,26 +32,35 @@ class LQR():
 
         theta_error = self.wrapped(th - self.cyaw[ind])
 
-        A = np.array([[1, self.dt, 0, 0], 
-        [0, 0, v, 0],
-        [0, 0, 1, self.dt],
-        [0, 0, 0, 0]])
+        A = np.array([[1, self.dt, 0, 0, 0], 
+        [0, 0, v, 0, 0],
+        [0, 0, 1, self.dt, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1]])
 
-        B = np.array([[0],
-        [0],
-        [0],
-        [v/self.L]])
+        B = np.array([[0, 0],
+        [0, 0],
+        [0, 0],
+        [v/self.L, 0],
+        [0, self.dt]])
 
         K = traj.lqr(A, B, Q, R)
 
         x = np.array([[error], 
         [(error-prev_error)/self.dt], 
         [theta_error], 
-        [(theta_error - prev_theta_error)/self.dt]])
+        [(theta_error - prev_theta_error)/self.dt],
+        [v-self.target_speed]])
 
-        delta = math.atan2(self.L*k, 1) + self.wrapped((-K@x)[0, 0])
+        ustar = -K @ x
 
-        return delta, ind, error, theta_error
+        # calc steering input
+        delta = math.atan2(self.L * k, 1) + self.wrapped(ustar[0, 0]) 
+
+        # calc accel input
+        accel = ustar[1, 0]
+
+        return delta, ind, error, theta_error, accel
 
     def find_path(self):
         T = 500 
@@ -72,8 +81,7 @@ class LQR():
         th_errors = [0]
         while T>=t:
             x, y, th, v = state
-            delta, ind, error, error_theta = self.get_control(state, error, error_theta)
-            a = traj.PID(self.target_speed, v)
+            delta, ind, error, error_theta, a = self.get_control(state, error, error_theta)
             ds.append(delta)
             accs.append(a)
             state = traj.update_state(state, a, delta)

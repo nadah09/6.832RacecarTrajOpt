@@ -44,7 +44,6 @@ if __name__ == "__main__" :
         lqr.plot_traj()
         t, x, y, yaw, v, d, a, errors, th_errors = lqr.find_path()
         #lqr.show_final(ax, ay, x, y, t, errors)
-        print("LQR", sum(errors), sum(th_errors))
         lx = x
         ly = y
         lerror = errors
@@ -54,7 +53,6 @@ if __name__ == "__main__" :
         mpc = mpc_utils.MPC(cx, cy, cyaw, ck, s, TARGET_SPEED)
         t, x, y, yaw, v, d, a, errors, th_errors = mpc.find_path()
         #mpc.show_final(ax, ay, x, y, t, errors)
-        print("MPC", sum(errors), sum(th_errors))
         mx = x 
         my = y
         merror = errors
@@ -68,6 +66,18 @@ if __name__ == "__main__" :
         plot.show_both_traj(cx, cy, ax, ay, mx, my, lx, ly, t)
         plot.show_both_error(tl, tm, lerror, merror)
         plot.show_both_th_error(tl, tm, ltherror, mtherror)
+
+        lerror = [abs(i) for i in lerror]
+        ltherror = [abs(i) for i in ltherror]
+
+        merror = [abs(i) for i in merror]
+        mtherror = [abs(i) for i in mtherror]
+
+        print("LQR", sum(lerror), sum(ltherror))
+        print("MPC", sum(merror), sum(mtherror))
+
+
+
 
 
 
