@@ -9,7 +9,7 @@ import plotting_utils as plot
 # LQR parameters
 Q = np.eye(4)
 R = np.eye(1)
-show_animation = True
+show_animation = False
 
 class LQR():
     def __init__(self, cx, cy, cyaw, ck, s, target_speed):
@@ -64,13 +64,18 @@ class LQR():
         ths = [th]
         vs = [v]
         ts = [t]
+        ds = [0]
+        accs = [0]
         error = 0.0
         error_theta = 0.0
         errors = [error]
+        th_errors = [0]
         while T>=t:
             x, y, th, v = state
             delta, ind, error, error_theta = self.get_control(state, error, error_theta)
             a = traj.PID(self.target_speed, v)
+            ds.append(delta)
+            accs.append(a)
             state = traj.update_state(state, a, delta)
             new_x, new_y, new_th, new_v = state
             t += self.dt
@@ -89,11 +94,12 @@ class LQR():
             vs.append(new_v)
             ts.append(t)
             errors.append(error)
+            th_errors.append(error_theta)
 
             if show_animation:
                 plot.show_animation(self.cx, self.cy, xs, ys, new_v, ind)
 
-        return ts, xs, ys, ths, vs, errors
+        return ts, xs, ys, ths, vs, ds, accs, errors, th_errors
     
     def plot_traj(self):
         plot.plot_traj(self.cx, self.cy)

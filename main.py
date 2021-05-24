@@ -5,6 +5,7 @@ import lqr as lqr_utils
 import mpc as mpc_utils
 import cubic_spline_planner
 import math 
+import plotting_utils as plot
 
 pi = math.pi
 
@@ -27,14 +28,11 @@ if __name__ == "__main__" :
     complexx = [0.0, 6.0, 12.5, 10.0, 7.5, 3.0, -1.0]
     complexy = [0.0, -3.0, -5.0, 6.5, 3.0, 5.0, -2.0]
 
-    sharpx = [0.0, 6.0, 12.5, 10.0, 7.5, 3.0, -1.0]
-    sharpy = [0.0, -1.0, -10.0, 6.5, 3.0, 5.0, -2.0]
-
     curvex = [0, 15, 15, 0]
     curvey = [0, 0, 15, 15]
 
-    axs = [straightx, curvex, complexx, sharpx]
-    ays = [straighty, curvey, complexy, sharpy]
+    axs = [straightx, curvex, complexx]
+    ays = [straighty, curvey, complexy]
 
     for i in range(len(axs)):
         ax = axs[i]
@@ -44,14 +42,33 @@ if __name__ == "__main__" :
 
         lqr = lqr_utils.LQR(cx, cy, cyaw, ck, s, TARGET_SPEED)
         lqr.plot_traj()
-        t, x, y, yaw, v, errors = lqr.find_path()
-        lqr.show_final(ax, ay, x, y, t, errors)
+        t, x, y, yaw, v, d, a, errors, th_errors = lqr.find_path()
+        #lqr.show_final(ax, ay, x, y, t, errors)
+        print("LQR", sum(errors), sum(th_errors))
+        lx = x
+        ly = y
+        lerror = errors
+        ltherror = th_errors
+        tl = t
 
-        """
         mpc = mpc_utils.MPC(cx, cy, cyaw, ck, s, TARGET_SPEED)
-        t, x, y, yaw, v, d, a = mpc.find_path()
-        mpc.show_final(ax, ay, x, y, t, errors)
-        """
+        t, x, y, yaw, v, d, a, errors, th_errors = mpc.find_path()
+        #mpc.show_final(ax, ay, x, y, t, errors)
+        print("MPC", sum(errors), sum(th_errors))
+        mx = x 
+        my = y
+        merror = errors
+        mtherror = th_errors
+        tm = t
+
+        maxtl = max(tl)
+        maxtm = max(tm)
+        tl = [float(i)/maxtl*maxtm for i in tl]
+
+        plot.show_both_traj(cx, cy, ax, ay, mx, my, lx, ly, t)
+        plot.show_both_error(tl, tm, lerror, merror)
+        plot.show_both_th_error(tl, tm, ltherror, mtherror)
+
 
 
 

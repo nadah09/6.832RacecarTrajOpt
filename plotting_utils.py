@@ -43,3 +43,39 @@ def show_final(cx, cy, ax, ay, x, y, t, error):
     plt.ylabel("error [1/m]")
 
     plt.show()
+
+def show_both_traj(cx, cy, ax, ay, mx, my, lx, ly, t):
+        plt.close()
+        plt.subplots(1)
+        plt.title("MPC vs. iLQR Trajectories")
+        plt.plot(ax, ay, "xb", label="input")
+        plt.plot(cx, cy, "-r", label="spline")
+        plt.plot(mx, my, "-g", label="MPC")
+        plt.plot(lx, ly, "-b", label="iLQR")
+        plt.grid(True)
+        plt.axis("equal")
+        plt.xlabel("x[m]")
+        plt.ylabel("y[m]")
+        plt.legend()
+
+def show_both_error(tl, tm, errorl, errorm):
+        plt.subplots(1)
+        plt.title("MPC vs. iLQR Cross Track Error")
+        plt.plot(tl, errorl, "-r", label="iLQR cross-track error")
+        plt.plot(tm, errorm, "-b", label="MPC cross-track error")
+        plt.grid(True)
+        plt.legend()
+        plt.xlabel("time[s]")
+        plt.ylabel("error [m]")
+        plt.show()
+
+def show_both_th_error(tl, tm, errorl, errorm):
+        plt.subplots(1)
+        plt.title("MPC vs. iLQR Angle Error")
+        plt.plot(tl, errorl, "-r", label="iLQR angle error")
+        plt.plot(tm, errorm, "-b", label="MPC angle error")
+        plt.grid(True)
+        plt.legend()
+        plt.xlabel("time[s]")
+        plt.ylabel("error [rad]")
+        plt.show()
